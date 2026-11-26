@@ -237,7 +237,14 @@ ol.howto{margin:8px 0 0;padding-left:22px;font-size:16px;line-height:1.6}ol.howt
   </div>
   <div class="card">
     <div class="scroll"><table id="resTable"></table></div>
-    <div class="row" style="margin-top:14px"><button class="btn ghost" id="clearBtn">ลบผลทั้งหมด</button></div>
+  </div>
+  <div class="card" id="clearCard">
+    <h2>ล้างผลการตรวจ</h2>
+    <p class="hint">ใช้เมื่อทดสอบระบบ หรือตรวจผิดพลาด • ลบรายคน: กดปุ่ม <b>ลบ</b> ท้ายแถวในตาราง แล้วตรวจแผ่นนั้นใหม่ • ล้างทั้งหมด: เฉพาะผู้ดูแลระบบ (ควรดาวน์โหลด Excel เก็บไว้ก่อน)</p>
+    <div id="clearAdmin">
+      <label style="display:flex;align-items:center;gap:8px;margin:6px 0 10px;font-size:17px"><input type="checkbox" id="clearKey" style="width:22px;height:22px"> ล้างเฉลยด้วย (เริ่มใหม่ทั้งหมด)</label>
+      <button class="btn danger" id="clearBtn">ล้างผลการตรวจทั้งหมด</button>
+    </div>
     <div id="clearConfirm"></div>
   </div>
 </section>
@@ -377,7 +384,7 @@ ol.howto{margin:8px 0 0;padding-left:22px;font-size:16px;line-height:1.6}ol.howt
 
 <script>
 /* ===== ใช้บน GitHub: วางลิงก์ Apps Script (ลงท้ายด้วย /exec) ระหว่างเครื่องหมาย ' ' (ถ้าใช้ใน Apps Script ไม่ต้องแก้) ===== */
-window.OMR_API = 'https://script.google.com/macros/s/AKfycbyJti6R6X-denQ_qqCj5W6D4ELeBSar-WzX_CCQ7_qidDcxvAZOq872CKp-axTQXRqD/exec';
+window.OMR_API = 'https://script.google.com/macros/s/AKfycby9DUluEM1vYW7E60MKoLxf47-8WIZAmhQmfZTG90QgSY7N4R8bdWYk-KVJ9edTPoeE/exec';
 </script>
 <script>
 (function(){
