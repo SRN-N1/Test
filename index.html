@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ระบบตรวจกระดาษคำตอบดิจิทัล</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script>
+window.__errs=[];
+window.addEventListener('error',function(e){try{var m=(e.message||'error')+' @'+(e.lineno||'?')+':'+(e.colno||'?');window.__errs.push(m);var b=document.getElementById('diagBox');if(!b)return;b.hidden=false;b.textContent='ข้อผิดพลาดของระบบ (ส่งภาพนี้ให้ผู้ดูแลระบบ): '+window.__errs.join(' | ');
+try{var scs=document.scripts,info=[];for(var j=0;j<scs.length;j++){var t=scs[j].text||'';if(t.length<5000)continue;var ls=t.split('\n');info.push('สคริปต์ '+j+': '+t.length+' ตัวอักษร, '+ls.length+' บรรทัด');
+var bad=function(k){try{new Function(ls.slice(0,k).join('\n')+'\n}');return false;}catch(x){return x.message.indexOf('Invalid or unexpected')>=0;}};
+var full=false;try{new Function(t);}catch(x){full=x.message;}
+if(full){info.push('ทดสอบทั้งสคริปต์: '+full);var lo=1,hi=ls.length;if(bad(hi)){while(lo<hi){var mid=(lo+hi)>>1;if(bad(mid))hi=mid;else lo=mid+1;}
+for(var k=Math.max(1,lo-1);k<=lo;k++){var l=ls[k-1]||'',odd=[];for(var c=0;c<l.length;c++){var cc=l.charCodeAt(c);if((cc<32&&cc!==9)||(cc>126&&!(cc>=0x0E00&&cc<=0x0E7F)))odd.push(c+':U+'+cc.toString(16));}
+info.push('บรรทัด '+k+': '+l.slice(0,160)+(odd.length?'  [อักขระพิเศษ '+odd.slice(0,8).join(' ')+']':''));}}}}
+var pre=document.createElement('pre');pre.style.cssText='white-space:pre-wrap;font-size:12px;margin:6px 0 0';pre.textContent=info.join('\n');b.appendChild(pre);}catch(_2){}}catch(_){}});
+</script>
+<style>
+/* VOICE: calm, official grading desk for exam committees — formal Thai, big targets
+   IDEA: the answer sheet on a grading desk; marks read like a teacher's pen (green right, red wrong, orange check)
+   PICTURE: the sheet itself — live preview in the builder, the scanned sheet with coloured rings in review
+   COLOUR and TYPE: navy with gold rule; mark colours fixed; Sarabun / TH SarabunPSK on paper
+   LAYOUT: one column, tabs at top, sticky action bar on review */
+:root{color-scheme:light dark;
+  --bg:light-dark(#f2f4f8,#12151c);--card:light-dark(#ffffff,#1b2029);--ink:light-dark(#18202e,#e8ecf3);
+  --mute:light-dark(#5a6375,#a3acbd);--line:light-dark(#d6dbe5,#323a48);
+  --brand:light-dark(#1d3a6e,#8fb2f2);--brandbg:light-dark(#e6edf9,#1c2a45);--head:#1d3a6e;--gold:#e0a82e;
+  --green:light-dark(#0b6e4f,#5ccf9f);--greenbg:light-dark(#e3f2ea,#183a2c);
+  --red:light-dark(#c8102e,#ff6b7d);--redbg:light-dark(#fbe6e8,#40181e);
+  --orange:light-dark(#d9730d,#ffa94d);--orangebg:light-dark(#fff1de,#3d2a14)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 'THSarabun','Sarabun',system-ui,sans-serif;overflow-x:clip}
+@font-face{font-family:'THSarabun';src:local('TH SarabunPSK'),local('THSarabunPSK'),local('TH Sarabun New'),local('THSarabunNew');font-weight:400;size-adjust:132%}
+@font-face{font-family:'THSarabun';src:local('TH SarabunPSK Bold'),local('THSarabunPSK-Bold'),local('TH Sarabun New Bold'),local('THSarabunNew-Bold');font-weight:700 800;size-adjust:132%}
+header{background:var(--head);color:#fff;padding:14px max(4vw,14px) 0;border-bottom:4px solid var(--gold)}
+.brand{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.brand img{width:64px;height:64px;border-radius:50%;background:#fff;padding:3px;flex:none;object-fit:contain}
+header h1{margin:0;font-size:22px;line-height:1.2;font-weight:800}
+header p{margin:2px 0 0;font-size:14px;opacity:.92}
+nav{display:flex;gap:4px}
+nav button{flex:1 1 auto;border:0;background:rgba(255,255,255,.14);color:#fff;font:600 15px 'THSarabun','Sarabun',sans-serif;padding:10px 4px;border-radius:10px 10px 0 0;min-height:48px;cursor:pointer}
+nav button[aria-selected=true]{background:var(--bg);color:var(--ink)}
+nav b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.22);margin-right:4px;font-size:13px}
+nav button[aria-selected=true] b{background:var(--gold);color:#1d2433}
+main{max-width:900px;margin:0 auto;padding:16px max(4vw,14px) 8px}
+footer{text-align:center;color:var(--mute);font-size:14px;line-height:1.6;padding:16px max(4vw,14px) 120px;border-top:1px solid var(--line);max-width:900px;margin:0 auto;white-space:pre-line}
+footer b{color:var(--ink)}
+[hidden]{display:none!important}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+h2{font-size:19px;margin:0 0 6px}
+h3{font-size:17px;margin:14px 0 6px}
+.hint{color:var(--mute);font-size:14px;margin:0 0 10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;font:700 17px 'THSarabun','Sarabun',sans-serif;padding:12px 18px;min-height:52px;cursor:pointer;background:var(--brand);color:#fff;text-decoration:none}
+@media (prefers-color-scheme:dark){.btn{color:#0f1726}}
+:root[data-theme=dark] .btn{color:#0f1726}:root[data-theme=light] .btn{color:#fff}
+.btn.alt{background:transparent;color:var(--brand);border:2px solid var(--brand)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.danger{background:var(--red);color:#fff}
+.btn.sm{min-height:40px;padding:6px 12px;font-size:15px}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:focus-visible,nav button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,.seg button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.big{width:100%;font-size:19px;min-height:64px}
+input[type=file]{display:none}
+textarea,input[type=text],input[type=password],input[type=number],select{width:100%;font:16px 'THSarabun','Sarabun',sans-serif;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+textarea{min-height:90px}
+label.f{display:block;font-size:14px;color:var(--mute);margin:8px 0 3px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:0 12px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 10px}
+.keygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:4px;margin-top:10px}
+.keygrid button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:4px 0;font:15px 'THSarabun','Sarabun',sans-serif;min-height:40px;cursor:pointer}
+.keygrid button small{color:var(--mute);font-size:12px;margin-right:3px}
+.keygrid button.empty{background:var(--orangebg);border-color:var(--orange)}
+.sechead{grid-column:1/-1;font-weight:700;font-size:14px;margin-top:6px;color:var(--brand)}
+.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:10px 0}
+.stat div{background:var(--bg);border-radius:10px;padding:8px 10px}
+.stat span{display:block;font-size:13px;color:var(--mute)}
+.stat strong{font-size:24px;line-height:1.2;font-variant-numeric:tabular-nums}
+.pass{color:var(--green)}.fail{color:var(--red)}
+.msg{padding:10px 12px;border-radius:10px;margin:10px 0;font-size:15px}
+.msg.ok{background:var(--greenbg)}.msg.warn{background:var(--orangebg)}.msg.err{background:var(--redbg)}
+.viewer{overflow:auto;border:1px solid var(--line);border-radius:10px;background:#fff;max-height:75vh;touch-action:pan-x pan-y}
+.viewer canvas{display:block;width:100%;height:auto;cursor:crosshair}
+.viewer.zoom canvas{width:230%}
+.preview{border:1px solid var(--line);border-radius:10px;background:#fff;overflow:auto;max-height:80vh}
+.preview canvas{display:block;width:100%;height:auto}
+.seg{display:flex;gap:6px;margin:4px 0 8px}.seg button{flex:1;min-height:44px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;font:600 15px 'THSarabun','Sarabun',sans-serif;cursor:pointer}.seg button[aria-pressed=true]{background:var(--brand);color:#fff;border-color:var(--brand)}.seg button[data-st]:not([data-st=''])[aria-pressed=true]{background:var(--red);border-color:var(--red);color:#fff}
+.trust{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:14px;font-size:15px;line-height:1.5}
+.sync{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--brandbg);border-radius:12px;padding:6px 8px 6px 14px;margin-bottom:14px;font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{background:var(--orangebg);border:1px solid var(--orange);border-radius:999px;padding:4px 10px;font-size:14px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--mute);margin:6px 0}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;border:3px solid;vertical-align:-1px;margin-right:4px}
+.idin{display:flex;gap:8px;align-items:center;margin:8px 0}
+.idin input{max-width:200px;font-size:22px;font-weight:700;letter-spacing:4px;text-align:center}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px max(4vw,14px) calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px;justify-content:center;z-index:5}
+.bar .btn{flex:1;max-width:320px}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{font-size:13px;color:var(--mute);font-weight:600}
+td:first-child,th:first-child,td.l,th.l{text-align:left}
+td input{min-width:70px;padding:5px 8px}
+.scroll{overflow-x:auto}
+.x{background:none;border:0;color:var(--red);font-size:20px;cursor:pointer;min-width:40px;min-height:40px}
+.confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--redbg);border-radius:10px;padding:10px;margin-top:8px}
+.spinner{width:22px;height:22px;border:3px solid rgba(0,0,0,.15);border-top-color:var(--brand);border-radius:50%;animation:sp .8s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spinner{animation:none}}
+ol.steps{margin:6px 0 0;padding-left:20px;font-size:15px}
+ol.howto{margin:8px 0 0;padding-left:22px;font-size:16px;line-height:1.6}ol.howto li{margin-bottom:10px}ol.howto b{color:var(--brand)}
+.sub{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.sub button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 14px;font:600 15px 'THSarabun','Sarabun',sans-serif;min-height:40px;cursor:pointer}.sub button[aria-pressed=true]{background:var(--brand);color:#fff;border-color:var(--brand)}
+.exp{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:10px}
+.exp .card{margin:0;background:var(--bg)}
+.exp .row .btn{flex:1}
+.logo-prev{width:64px;height:64px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:10px}
+.lock{background:var(--orangebg);border-radius:10px;padding:8px 12px;font-size:14px;margin-bottom:10px}
+@media(max-width:600px){table{font-size:13px}header h1{font-size:19px}nav button{font-size:14px}}
+@media(max-width:560px){.wide{display:none}nav{gap:3px}nav button{padding:10px 2px}nav b{width:18px;height:18px;margin-right:2px}.grid3{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><img id="hdLogo" alt="ตราหน่วยงาน"><div>
+  <h1>ระบบตรวจกระดาษคำตอบดิจิทัล</h1>
+  <p id="hdOrg"></p>
+  </div></div>
+  <nav role="tablist">
+    <button role="tab" id="t-key" aria-selected="true"><b>1</b>เฉลย</button>
+    <button role="tab" id="t-scan" aria-selected="false"><b>2</b>ตรวจ</button>
+    <button role="tab" id="t-res" aria-selected="false"><b>3</b>ผล<span class="wide">คะแนน</span></button>
+    <button role="tab" id="t-bld" aria-selected="false" aria-label="สร้างกระดาษคำตอบ"><span class="wide">สร้าง</span>กระดาษคำตอบ</button>
+    <button role="tab" id="t-help" aria-selected="false" aria-label="ขั้นตอนการใช้งาน">ขั้นตอน<span class="wide">การใช้งาน</span></button>
+  </nav>
+</header>
+
+<main>
+<div id="diagBox" hidden style="background:#fbe6e8;color:#9c0c24;border-radius:10px;padding:10px;margin-bottom:12px;font-size:14px"></div>
+<div class="trust">
+  <b>คำชี้แจง</b>
+  <ol class="steps" style="margin-top:4px">
+    <li>ระบบนี้สำหรับตรวจกระดาษคำตอบด้วยระบบดิจิทัล</li>
+    <li>ออกแบบเพื่อสร้างกระดาษคำตอบและตรวจคำตอบ</li>
+    <li>โปร่งใส มีความเที่ยงตรง และแม่นยำในการตรวจ</li>
+    <li>ลดขั้นตอนการทำงาน</li>
+  </ol>
+</div>
+<section id="p-login" hidden>
+  <div class="card">
+    <h2>เข้าสู่ระบบ</h2>
+    <p class="hint">ผลการตรวจจากทุกเครื่องจะบันทึกรวมไว้ที่ฐานข้อมูลกลางแห่งเดียว</p>
+    <label for="lgPin"><b>รหัสผ่าน</b></label>
+    <input type="password" id="lgPin" inputmode="numeric" style="margin:6px 0 12px">
+    <button class="btn big" id="lgBtn">เข้าสู่ระบบ</button>
+    <div id="lgMsg"></div>
+  </div>
+</section>
+<div class="sync" id="syncBar" hidden><span id="syncTxt"></span><button class="btn ghost sm" id="syncBtn">รีเฟรช</button></div>
+
+<!-- KEY -->
+<section id="p-key">
+  <div class="card">
+    <h2>ใส่เฉลย</h2>
+    <p class="hint">ระบายเฉลยลงบนกระดาษเฉลย 1 แผ่น แล้วถ่ายภาพ หรือพิมพ์เฉลยในช่องด้านล่าง</p>
+    <div class="row">
+      <button class="btn" id="keyCamBtn">ถ่ายภาพกระดาษเฉลย</button>
+      <button class="btn alt" id="keyFileBtn">เลือกภาพจากเครื่อง</button>
+    </div>
+    <input type="file" id="keyCam" accept="image/*" capture="environment">
+    <input type="file" id="keyFile" accept="image/*">
+    <div id="keyMsg"></div>
+  </div>
+  <div class="card">
+    <h2>หรือพิมพ์เฉลย</h2>
+    <p class="hint" id="keyHint"></p>
+    <textarea id="keyText" placeholder="เช่น กขคง กขคง ... หรือ 1234 1234 ..."></textarea>
+    <div class="row" style="margin-top:8px">
+      <button class="btn" id="keyApply">ใช้เฉลยนี้</button>
+      <span id="keyCount" class="hint" style="margin:0"></span>
+      <button class="btn ghost" id="keyClear" style="margin-left:auto">ล้างเฉลย</button>
+    </div>
+    <div id="keyClearBox"></div>
+    <div class="keygrid" id="keyGrid"></div>
+  </div>
+</section>
+
+<!-- SCAN -->
+<section id="p-scan" hidden>
+  <div class="card" id="scanStart">
+    <h2>ถ่ายภาพกระดาษคำตอบ</h2>
+    <ol class="steps">
+      <li>วางกระดาษให้เรียบบนโต๊ะ ในที่สว่าง ไม่มีเงามือหรือเงาโทรศัพท์ทับ</li>
+      <li>ถ่ายตรง ๆ จากด้านบน ให้เห็น<b>สี่เหลี่ยมดำครบทั้ง 4 มุม</b></li>
+      <li>ข้อที่ขึ้น<span style="color:var(--orange);font-weight:700">สีส้ม</span> ให้ตรวจสอบกับกระดาษจริง แตะวงกลมเพื่อแก้ไข แล้วกดบันทึก</li>
+    </ol>
+    <div class="row" style="margin-top:12px">
+      <button class="btn big" id="camBtn">📷 ถ่ายภาพกระดาษคำตอบ</button>
+      <button class="btn alt" id="fileBtn" style="width:100%">เลือกภาพจากเครื่อง (เลือกได้หลายภาพ)</button>
+    </div>
+    <input type="file" id="cam" accept="image/*" capture="environment">
+    <input type="file" id="file" accept="image/*" multiple>
+    <div id="scanMsg"></div>
+  </div>
+  <div id="review" hidden>
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h2 id="revTitle">ผลการอ่าน</h2>
+        <button class="btn ghost sm" id="zoomBtn">ขยาย</button>
+      </div>
+      <div class="idin"><label for="idIn"><b>เลขประจำตัวสอบ</b></label><input type="text" id="idIn" inputmode="numeric"></div>
+      <div class="idin" id="setWrap" style="display:none"><label for="setIn"><b>ชุดข้อสอบ</b></label><input type="text" id="setIn" inputmode="numeric"></div>
+      <div id="idName" style="font-size:18px;font-weight:700;margin:-2px 0 8px"></div>
+      <div class="seg" id="stSeg" role="group" aria-label="สถานะผู้เข้าสอบ"><button data-st="">เข้าสอบปกติ</button><button data-st="ขาดสอบ">ขาดสอบ</button><button data-st="ยุติการสอบ">ยุติการสอบ</button></div>
+      <div id="revMsg"></div>
+      <div class="stat" id="revStat"></div>
+      <div class="chips" id="revChips"></div>
+      <div class="legend"><span><i style="border-color:#0b9e6a"></i>ตอบถูก</span><span><i style="border-color:#d0102e"></i>ตอบผิด</span><span><i style="border-color:#1d6fe0"></i>เฉลยของข้อที่ผิด</span><span><i style="border-color:#f08a00"></i>กรรมการต้องตรวจสอบ</span></div>
+      <div class="viewer" id="viewer"><canvas id="cv"></canvas></div>
+      <p class="hint" style="margin-top:6px">แตะวงกลมบนภาพเพื่อเปลี่ยนคำตอบ แตะวงที่เลือกอยู่ซ้ำเพื่อล้าง (ข้อนั้นจะบันทึกว่าแก้ไขโดยกรรมการ)</p>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="p-res" hidden>
+  <div class="card">
+    <h2>ผลคะแนน</h2>
+    <p class="hint" id="resHint"></p>
+    <div class="stat" id="resStat"></div>
+    <div class="row">
+      <button class="btn" id="xlsxBtn">ดาวน์โหลด Excel</button>
+      <button class="btn alt" id="copyBtn">คัดลอกตาราง</button>
+    </div>
+    <div id="resMsg"></div>
+  </div>
+  <div class="card">
+    <div class="scroll"><table id="resTable"></table></div>
+    <div class="row" style="margin-top:14px"><button class="btn ghost" id="clearBtn">ลบผลทั้งหมด</button></div>
+    <div id="clearConfirm"></div>
+  </div>
+</section>
+
+<!-- BUILDER -->
+<section id="p-bld" hidden>
+  <div class="sub" role="group" aria-label="เมนูย่อย">
+    <button data-sub="b-exam" aria-pressed="true">ข้อมูลการสอบ</button>
+    <button data-sub="b-roster" aria-pressed="false">รายชื่อผู้เข้าสอบ</button>
+    <button data-sub="b-text" aria-pressed="false">คำแนะนำและข้อความ</button>
+    <button data-sub="b-out" aria-pressed="false">ดาวน์โหลดและส่งออก</button>
+  </div>
+  <div id="bldLock" class="lock" hidden></div>
+
+  <div class="card" id="b-exam">
+    <h2>ข้อมูลการสอบ</h2>
+    <p class="hint">ข้อมูลส่วนนี้พิมพ์บนหัวกระดาษคำตอบ และใช้ในการตรวจให้คะแนน</p>
+    <div class="row" style="align-items:flex-end">
+      <img class="logo-prev" id="bLogoPrev" alt="ตราหน่วยงาน">
+      <div><button class="btn ghost sm" id="bLogoBtn">เปลี่ยนตราหน่วยงาน</button><input type="file" id="bLogo" accept="image/*"></div>
+    </div>
+    <label class="f" for="cf_org">ชื่อหน่วยงาน (แสดงบนหัวเว็บ)</label><input type="text" id="cf_org" data-cf="org">
+    <label class="f" for="cf_title">หัวกระดาษ</label><input type="text" id="cf_title" data-cf="title">
+    <label class="f" for="cf_l1">บรรทัดที่ 1 (ชื่อการสอบ / ตำแหน่ง)</label><input type="text" id="cf_l1" data-cf="l1">
+    <label class="f" for="cf_l2">บรรทัดที่ 2 (สังกัด)</label><input type="text" id="cf_l2" data-cf="l2">
+    <label class="f" for="cf_l3">บรรทัดที่ 3 (วัน เวลา)</label><input type="text" id="cf_l3" data-cf="l3">
+    <div class="grid2">
+      <div><label class="f" for="cf_place">สถานที่สอบ (ค่าเริ่มต้น)</label><input type="text" id="cf_place" data-cf="place"></div>
+      <div><label class="f" for="cf_room">ห้องสอบ (ค่าเริ่มต้น)</label><input type="text" id="cf_room" data-cf="room"></div>
+    </div>
+    <h3>รูปแบบข้อสอบ</h3>
+    <div class="grid3">
+      <div><label class="f" for="cf_n">จำนวนข้อ (สูงสุด 200)</label><input type="number" id="cf_n" data-cf="n" data-num min="5" max="200"></div>
+      <div><label class="f" for="cf_ch">จำนวนตัวเลือก</label><select id="cf_ch" data-cf="ch" data-num><option value="4">4 ตัวเลือก (ก–ง)</option><option value="5">5 ตัวเลือก (ก–จ)</option></select></div>
+      <div><label class="f" for="cf_dig">เลขประจำตัวสอบ (หลัก)</label><input type="number" id="cf_dig" data-cf="dig" data-num min="3" max="10"></div>
+      <div><label class="f" for="cf_setd">ช่องชุดข้อสอบ (หลัก)</label><select id="cf_setd" data-cf="setd" data-num><option value="0">ไม่มี</option><option value="1">1 หลัก</option><option value="2">2 หลัก</option><option value="3">3 หลัก</option></select></div>
+    </div>
+    <h3>การแบ่งภาคและเกณฑ์ผ่าน</h3>
+    <p class="hint">กำหนดช่วงข้อของแต่ละภาคให้ต่อเนื่องกันจนครบทุกข้อ เกณฑ์ผ่านเว้นว่างได้ถ้าไม่ใช้ • จัดลำดับตามคะแนนรวม หากเท่ากันพิจารณาคะแนนภาคท้ายสุดก่อน</p>
+    <div class="scroll"><table id="secTable"></table></div>
+    <div class="row" style="margin-top:8px"><button class="btn ghost sm" id="secAdd">+ เพิ่มภาค</button></div>
+    <div id="examMsg"></div>
+  </div>
+
+  <div class="card" id="b-roster" hidden>
+    <h2>รายชื่อผู้เข้าสอบ</h2>
+    <p class="hint">นำเข้าจากไฟล์ Excel (.xlsx) หรือ CSV ที่มีคอลัมน์เลขประจำตัวสอบและชื่อ–สกุล (มีคอลัมน์ห้องสอบได้) ระบบจะค้นหาหัวคอลัมน์ให้อัตโนมัติ หรือวางข้อมูลที่คัดลอกจาก Excel ลงในช่องด้านล่าง</p>
+    <div class="row">
+      <button class="btn" id="rImpBtn">นำเข้าไฟล์ Excel / CSV</button><input type="file" id="rImp" accept=".xlsx,.csv,.txt">
+      <button class="btn alt" id="rTplBtn">ดาวน์โหลดแบบฟอร์ม Excel</button>
+    </div>
+    <details style="margin-top:10px"><summary>วางข้อมูลจาก Excel</summary>
+      <textarea id="rPaste" placeholder="0001	นางสาวตัวอย่าง ใจดี	1"></textarea>
+      <div class="row" style="margin-top:6px"><button class="btn ghost sm" id="rPasteAdd">เพิ่มต่อท้าย</button><button class="btn ghost sm" id="rPasteRep">แทนที่รายชื่อทั้งหมด</button></div>
+    </details>
+    <div id="rosMsg"></div>
+    <div class="row" style="justify-content:space-between;margin-top:8px"><b id="rCount"></b><div class="row"><button class="btn ghost sm" id="rAdd">+ เพิ่มรายชื่อ</button><button class="btn ghost sm" id="rClear">ล้างรายชื่อ</button></div></div>
+    <div id="rClearBox"></div>
+    <div class="scroll" style="max-height:60vh;overflow:auto;margin-top:8px"><table id="rosTable"></table></div>
+  </div>
+
+  <div class="card" id="b-text" hidden>
+    <h2>คำแนะนำและข้อความ</h2>
+    <label class="f" for="cf_tips">คำแนะนำในการตอบ (บรรทัดละ 1 ข้อ ไม่เกิน 6 บรรทัด)</label><textarea id="cf_tips" data-cf="tips" rows="6"></textarea>
+    <label class="f" for="cf_foot">ข้อความท้ายกระดาษคำตอบ</label><input type="text" id="cf_foot" data-cf="foot">
+    <label class="f" for="cf_credit">ผู้พัฒนา (ท้ายหน้าเว็บ)</label><textarea id="cf_credit" data-cf="credit" rows="2"></textarea>
+  </div>
+
+  <div class="card" id="b-out" hidden>
+    <h2>ไฟล์กระดาษคำตอบที่เตรียมไว้</h2>
+    <p class="hint">ดาวน์โหลดไฟล์ PDF ที่จัดทำไว้แล้วสำหรับการสอบครั้งนี้ สั่งพิมพ์ได้ทันที</p>
+    <div id="fileLinks" class="exp"></div>
+    <details id="fileEditBox" style="margin-top:10px"><summary>แก้ไขลิงก์ไฟล์ (ผู้ดูแลระบบ)</summary>
+      <p class="hint" style="margin-top:6px">วางลิงก์ไฟล์จาก Google Drive (ตั้งค่าแชร์เป็น "ทุกคนที่มีลิงก์") แล้วกด "บันทึกการตั้งค่า"</p>
+      <div class="scroll"><table id="fileTable"></table></div>
+      <div class="row" style="margin-top:6px"><button class="btn ghost sm" id="fileAdd">+ เพิ่มไฟล์</button></div>
+    </details>
+    <h2 style="margin-top:22px">ตัวอย่างและส่งออก</h2>
+    <p class="hint">สร้างไฟล์ใหม่จากการตั้งค่าปัจจุบัน ใช้เมื่อแก้ไขข้อมูลการสอบหรือรายชื่อ</p>
+    <div class="row" style="margin-bottom:8px">
+      <select id="pvSel" style="max-width:340px" aria-label="เลือกหน้าที่จะแสดงตัวอย่าง"></select>
+    </div>
+    <div class="preview"><canvas id="pv" width="1050" height="1485"></canvas></div>
+    <h3>ส่งออกไฟล์</h3>
+    <p class="hint">PDF และ Word ใส่กระดาษเป็นภาพทั้งหน้า ขนาด A4 ตำแหน่งวงกลมตรงกับที่ระบบอ่าน • สั่งพิมพ์ที่ขนาดจริง 100% • หากต้องแก้ข้อความ ให้แก้ในเมนูนี้แล้วส่งออกใหม่</p>
+    <div class="row" style="margin-bottom:10px"><label for="exRoom" style="font-size:15px">ห้องสอบ</label><select id="exRoom" style="max-width:220px"></select></div>
+    <div class="exp">
+      <div class="card"><b>กระดาษคำตอบรายบุคคล</b><p class="hint" id="exPersonHint" style="margin:4px 0 8px"></p><div class="row"><button class="btn sm" data-ex="person:pdf">PDF</button><button class="btn alt sm" data-ex="person:docx">Word</button></div></div>
+      <div class="card"><b>กระดาษคำตอบเปล่า</b><p class="hint" style="margin:4px 0 8px">สำรองกรณีกระดาษชำรุด ผู้สอบเขียนเลขเอง</p><div class="row"><button class="btn sm" data-ex="blank:pdf">PDF</button><button class="btn alt sm" data-ex="blank:docx">Word</button></div></div>
+      <div class="card"><b>กระดาษเฉลย</b><p class="hint" style="margin:4px 0 8px">สำหรับกรรมการระบายเฉลยแล้วถ่ายภาพ</p><div class="row"><button class="btn sm" data-ex="key:pdf">PDF</button><button class="btn alt sm" data-ex="key:docx">Word</button></div></div>
+      <div class="card"><b>รายชื่อผู้เข้าสอบ</b><p class="hint" style="margin:4px 0 8px">บัญชีรายชื่อเป็นไฟล์ Excel</p><div class="row"><button class="btn sm" data-ex="roster:xlsx">Excel</button></div></div>
+    </div>
+    <div id="exMsg"></div>
+    <ol class="steps" style="margin-top:12px">
+      <li>สั่งพิมพ์บนกระดาษ <b>A4</b> ตั้งขนาดเป็น <b>ขนาดจริง / 100%</b> ห้ามเลือก "พอดีกับหน้า"</li>
+      <li>พิมพ์หน้าเดียว ขาวดำ ให้คมชัด</li>
+      <li>พิมพ์ทดลอง 1 แผ่น วัดจากขอบซ้ายของสี่เหลี่ยมดำมุมซ้ายบนถึงขอบขวาของสี่เหลี่ยมดำมุมขวาบน ต้องได้ <b>19.4 ซม.</b></li>
+    </ol>
+  </div>
+  <div class="bar" id="bldBar" hidden>
+    <button class="btn ghost" id="bldUndo">ยกเลิกการแก้ไข</button>
+    <button class="btn" id="bldSave">บันทึกการตั้งค่า</button>
+  </div>
+</section>
+
+<!-- HELP -->
+<section id="p-help" hidden>
+  <div class="card">
+    <h2>ขั้นตอนการใช้งาน</h2>
+    <p class="hint">ระบบรองรับการใช้งานผ่านโทรศัพท์มือถือ แท็บเล็ต และคอมพิวเตอร์ ผลการตรวจจากทุกเครื่องบันทึกรวมไว้ที่ฐานข้อมูลกลางแห่งเดียว</p>
+    <h3>สำหรับผู้ดูแลระบบ (ก่อนวันสอบ)</h3>
+    <ol class="howto">
+      <li><b>กำหนดข้อมูลการสอบ</b> ที่เมนู "สร้างกระดาษคำตอบ" > "ข้อมูลการสอบ" ใส่ตราหน่วยงาน หัวกระดาษ จำนวนข้อ จำนวนตัวเลือก จำนวนหลักเลขประจำตัวสอบ การแบ่งภาค และเกณฑ์ผ่าน</li>
+      <li><b>นำเข้ารายชื่อผู้เข้าสอบ</b> ที่ "รายชื่อผู้เข้าสอบ" นำเข้าไฟล์ Excel หรือวางข้อมูล แล้วตรวจสอบ แก้ไข เพิ่ม หรือลบรายชื่อ</li>
+      <li><b>ปรับคำแนะนำและข้อความ</b> ที่ "คำแนะนำและข้อความ" แล้วกด "บันทึกการตั้งค่า"</li>
+      <li><b>ดาวน์โหลดและพิมพ์กระดาษคำตอบ</b> ที่ "ดาวน์โหลดและส่งออก" ดาวน์โหลดไฟล์ที่เตรียมไว้ได้ทันที หรือส่งออกใหม่เป็น PDF หรือ Word แล้วสั่งพิมพ์ขนาดจริง 100%</li>
+    </ol>
+    <h3>สำหรับกรรมการตรวจ</h3>
+    <ol class="howto">
+      <li><b>ใส่เฉลย</b> ที่เมนู "1 เฉลย" ถ่ายภาพกระดาษเฉลย หรือพิมพ์เฉลยแล้วกด "ใช้เฉลยนี้" ตรวจสอบให้เฉลยครบทุกข้อก่อนเริ่มตรวจ</li>
+      <li><b>ถ่ายภาพกระดาษคำตอบ</b> ที่เมนู "2 ตรวจ" ถ่ายตรงจากด้านบนให้เห็นสี่เหลี่ยมดำครบทั้ง 4 มุม หรือเลือกภาพจากเครื่องได้หลายภาพ</li>
+      <li><b>ตรวจสอบผลการอ่าน</b> ตรวจเลขประจำตัวสอบและชื่อ–สกุล ข้อที่มีแถบสีส้มให้เทียบกับกระดาษจริง แตะวงกลมเพื่อแก้ไข</li>
+      <li><b>ระบุสถานะ</b> กรณีขาดสอบหรือยุติการสอบ เลือกปุ่มสถานะ (ระบบอ่านจากวงกลมที่กรรมการระบายให้อัตโนมัติ)</li>
+      <li><b>บันทึกคะแนน</b> กด "บันทึกคะแนน" แล้วตรวจแผ่นถัดไป</li>
+      <li><b>ดูผลและส่งออก</b> ที่เมนู "3 ผลคะแนน" แล้วกด "ดาวน์โหลด Excel" ได้ 3 แผ่นงาน คือ สรุปคะแนน คำตอบรายข้อ และวิเคราะห์รายข้อ</li>
+    </ol>
+    <div class="msg warn" style="margin-top:12px"><b>ข้อควรระวัง</b> หากแก้ไขจำนวนข้อ จำนวนตัวเลือก หรือจำนวนหลักเลขประจำตัวสอบ ต้องพิมพ์กระดาษคำตอบใหม่ทั้งหมด และแก้ไขได้เฉพาะเมื่อยังไม่มีผลคะแนน • หลีกเลี่ยงเงามือหรือเงาโทรศัพท์บนกระดาษ • ห้ามพับกระดาษคำตอบ</div>
+  </div>
+</section>
+</main>
+<footer id="ftCredit"></footer>
+
+<div class="bar" id="saveBar" hidden>
+  <button class="btn ghost" id="retakeBtn">ถ่ายภาพใหม่</button>
+  <button class="btn" id="saveBtn">บันทึกคะแนน</button>
+</div>
+
+<script>
+/* ===== ใช้บน GitHub: วางลิงก์ Apps Script (ลงท้ายด้วย /exec) ระหว่างเครื่องหมาย ' ' (ถ้าใช้ใน Apps Script ไม่ต้องแก้) ===== */
+window.OMR_API = 'PASTE_EXEC_URL_HERE';
+</script>
+<script>
+(function(){
+  var box=document.getElementById('diagBox');
+  function fail(m){if(box){box.hidden=false;box.textContent='โหลดระบบไม่สำเร็จ: '+m+' — กดรีเฟรชเพื่อลองใหม่';}}
+  function run(code){var s=document.createElement('script');s.text=code;document.body.appendChild(s);}
+  if(window.google&&google.script&&google.script.run){
+    google.script.run.withSuccessHandler(run).withFailureHandler(function(e){fail(e&&e.message?e.message:String(e));}).api_appjs();
+    return;
+  }
+  var u=window.OMR_API;
+  if(typeof u!=='string'||u.indexOf('https://script.google.com/')!==0){fail('ยังไม่ได้ใส่ลิงก์ Apps Script (/exec) ในไฟล์ index.html');return;}
+  fetch(u,{method:'POST',body:JSON.stringify({fn:'api_appjs',args:[]}),redirect:'follow'})
+    .then(function(r){return r.text();})
+    .then(function(t){var j;try{j=JSON.parse(t);}catch(e){throw new Error('ลิงก์ไม่ถูกต้อง หรือยังไม่ได้ตั้งค่าการเข้าถึงเป็น "ทุกคน"');}if(!j.ok)throw new Error(j.error||'error');run(j.data);})
+    .catch(function(e){fail(e.message||String(e));});
+})();
+</script>
+</body>
+</html>
